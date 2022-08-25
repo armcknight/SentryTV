@@ -29,7 +29,7 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" sectionHeaderHeight="66" sectionFooterHeight="66" translatesAutoresizingMaskIntoConstraints="NO" id="Kgr-cD-n9N">
                                 <rect key="frame" x="439" y="68" width="1385" height="944"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ProjectCell" id="DX1-HZ-YWr" customClass="ProjectTableViewCell" customModule="SentryTV" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="OrganizationCell" id="DX1-HZ-YWr" customClass="OrganizationTableViewCell" customModule="SentryTV" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="66" width="1385" height="66"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="DX1-HZ-YWr" id="0IP-jY-JyU">
@@ -44,7 +44,7 @@
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yjC-1z-CyT">
-                                                    <rect key="frame" x="272" y="-28.5" width="1097" height="46"/>
+                                                    <rect key="frame" x="272" y="8" width="1097" height="46"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -57,7 +57,7 @@
                                                 <constraint firstItem="yjC-1z-CyT" firstAttribute="leading" secondItem="vKS-Gf-A9v" secondAttribute="trailing" constant="16" id="Je6-HU-Mdh"/>
                                                 <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="yjC-1z-CyT" secondAttribute="bottom" constant="8" id="ncF-RC-VUB"/>
                                                 <constraint firstItem="vKS-Gf-A9v" firstAttribute="leading" secondItem="0IP-jY-JyU" secondAttribute="leading" constant="16" id="pnc-d7-pLV"/>
-                                                <constraint firstItem="yjC-1z-CyT" firstAttribute="firstBaseline" secondItem="vKS-Gf-A9v" secondAttribute="firstBaseline" id="sqj-yJ-foI"/>
+                                                <constraint firstItem="yjC-1z-CyT" firstAttribute="top" secondItem="vKS-Gf-A9v" secondAttribute="top" id="tfs-RJ-Uxd"/>
                                                 <constraint firstAttribute="trailing" secondItem="yjC-1z-CyT" secondAttribute="trailing" constant="16" id="xns-mU-N1e"/>
                                             </constraints>
                                         </tableViewCellContentView>
