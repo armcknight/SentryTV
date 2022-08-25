@@ -5,10 +5,14 @@
 //  Created by Andrew McKnight on 8/24/22.
 //
 
+import Keys
+import Then
 import UIKit
 
-typealias SentryOrganization = [String: Any]
-typealias SentryProject = [String: Any]
+typealias SentryJSON = [String: Any]
+typealias SentryJSONCollection = [SentryJSON]
+typealias SentryOrganizations = SentryJSONCollection
+typealias SentryProjects = SentryJSONCollection
 
 enum SentryAPI {
     case authorize
@@ -19,49 +23,38 @@ enum SentryAPI {
 
     var path: String {
         switch self {
-        case .authorize: return ""
-        case .organizations: return "organizations"
-        case .projects(let org): return ["organizations", org, "projects"].joined(separator: "/")
+        case .authorize: return "/api/0/"
+        case .organizations: return "/api/0/organizations/"
+        case .projects(let org): return "/api/0/organizations\(org)/projects/"
+        }
+    }
+
+    var query: String? {
+        switch self {
+        case .organizations: return "member=1"
+        default: return nil
         }
     }
 }
 
-struct SentryAPIClient {
+class SentryAPIClient: NSObject {
     enum SentryAPIClientError: Error {
         case error(String)
     }
 
-    private static let urlSession = URLSession(configuration: .default)
-    private static var token: String?
+    private lazy var urlSession: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = ["Authorization": "Bearer \(token)"]
+        return URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
+    }()
+    private var token: String = SentryTVKeys().sentryAuthToken
 
-    private static var cachedOrganizations: SentryOrganization?
-    private static var cachedProjects: SentryProject?
+    private var cachedOrganizations: SentryOrganizations?
+    private var cachedProjects: SentryProjects?
 }
 
 extension SentryAPIClient {
-    static func authorize(handler: @escaping (Result<String, Error>) -> Void) {
-        if let token = token {
-            handler(.success(token))
-        }
-
-        switch buildRequest(.authorize) {
-        case .failure(let error): handler(.failure(error))
-        case .success(let request):
-            get(request: request) { result in
-                switch result {
-                case .failure(let error): handler(.failure(error))
-                case .success(let response):
-                    guard let token = response["token"] as? String else {
-                        handler(.failure(SentryAPIClientError.error("Couldn't parse token from authorization response.")))
-                        return
-                    }
-                    handler(.success(token))
-                }
-            }
-        }
-    }
-
-    static func getOrganizations(handler: @escaping (Result<SentryOrganization, Error>) -> Void) {
+    func getOrganizations(handler: @escaping (Result<SentryOrganizations, Error>) -> Void) {
         if let cachedOrganizations = cachedOrganizations {
             handler(.success(cachedOrganizations))
             return
@@ -69,24 +62,17 @@ extension SentryAPIClient {
 
         switch buildRequest(.organizations) {
         case .failure(let error): handler(.failure(error))
-        case .success(var request):
-            authorize { result in
-                switch result {
-                case .failure(let error): handler(.failure(error))
-                case .success(let token):
-                    request.addValue("Authorization", forHTTPHeaderField: "Bearer \(token)")
-                    get(request: request) { requestResult in
-                        handler(requestResult.map { json -> SentryOrganization in
-                            cachedOrganizations = json
-                            return json
-                        })
-                    }
-                }
+        case .success(let request):
+            self.get(request: request) { requestResult in
+                handler(requestResult.map { json -> SentryOrganizations in
+                    self.cachedOrganizations = json
+                    return json
+                })
             }
         }
     }
 
-    static func getProjects(organization: String, handler: @escaping (Result<SentryProject, Error>) -> Void) {
+    func getProjects(organization: String, handler: @escaping (Result<SentryProjects, Error>) -> Void) {
         if let cachedProjects = cachedProjects {
             handler(.success(cachedProjects))
             return
@@ -94,39 +80,42 @@ extension SentryAPIClient {
 
         switch buildRequest(.projects(organization)) {
         case .failure(let error): handler(.failure(error))
-        case .success(var request):
-            authorize { result in
-                switch result {
-                case .failure(let error): handler(.failure(error))
-                case .success(let token):
-                    request.addValue("Authorization", forHTTPHeaderField: "Bearer \(token)")
-                    get(request: request) { requestResult in
-                        handler(requestResult.map { json -> SentryOrganization in
-                            cachedProjects = json
-                            return json
-                        })
-                    }
-                }
+        case .success(let request):
+            self.get(request: request) { requestResult in
+                handler(requestResult.map { json -> SentryOrganizations in
+                    self.cachedProjects = json
+                    return json
+                })
             }
         }
     }
 }
 
+extension URLComponents: Then {}
+
 private extension SentryAPIClient {
-    static func buildRequest(_ endpoint: SentryAPI) -> Result<URLRequest, Error> {
-        guard let url = URL(string: "https://sentry.io/api/0/\(endpoint.path)") else {
+    func buildRequest(_ endpoint: SentryAPI) -> Result<URLRequest, Error> {
+        let components = URLComponents().with {
+            $0.scheme = "https"
+            $0.host = "sentry.io"
+            $0.path = endpoint.path
+            $0.query = endpoint.query
+        }
+
+        guard let url = components.url else {
             return .failure(SentryAPIClientError.error("Couldn't construct URL"))
         }
 
         var urlRequest = URLRequest(url: url)
         urlRequest.addValue("Content Type", forHTTPHeaderField: "application/json; charset=utf-8")
+        urlRequest.addValue("Authorization", forHTTPHeaderField: "Bearer \(token)")
 
         return .success(urlRequest)
     }
 
-    static func get(request: URLRequest, handler: @escaping (Result<[String: Any], Error>) -> Void) {
+    func get(request: URLRequest, handler: @escaping (Result<SentryJSONCollection, Error>) -> Void) {
         let task = urlSession.dataTask(with: request) { data, response, error in
-            decodedJSONFromRequest(data: data, response: response, error: error) { result in
+            self.decodedJSONFromRequest(data: data, response: response, error: error) { result in
                 switch result {
                 case .success(let json):
                     handler(.success(json))
@@ -139,7 +128,7 @@ private extension SentryAPIClient {
         task.resume()
     }
 
-    static func decodedJSONFromRequest(data: Data?, response: URLResponse?, error: Error?, handler: @escaping (Result<[String: Any], Error>) -> Void) {
+    func decodedJSONFromRequest(data: Data?, response: URLResponse?, error: Error?, handler: @escaping (Result<SentryJSONCollection, Error>) -> Void) {
         guard error == nil else {
             handler(.failure(SentryAPIClientError.error("Request failed with error: \(String(describing: error))")))
             return
@@ -161,7 +150,9 @@ private extension SentryAPIClient {
         }
 
         do {
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            let string = String(data: data, encoding: .utf8)
+            let json = try JSONSerialization.jsonObject(with: data)
+            guard let json = try JSONSerialization.jsonObject(with: data) as? SentryJSONCollection else {
                 handler(.failure(SentryAPIClientError.error("Unexpected JSON structure.")))
                 return
             }

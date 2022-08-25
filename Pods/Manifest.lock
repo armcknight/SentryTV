@@ -1,0 +1,30 @@
+PODS:
+  - Keys (1.0.1)
+  - Sentry (7.23.0):
+    - Sentry/Core (= 7.23.0)
+  - Sentry/Core (7.23.0)
+  - Then (3.0.0)
+
+DEPENDENCIES:
+  - Keys (from `Pods/CocoaPodsKeys`)
+  - Sentry (from `sentry-cocoa`)
+  - Then
+
+SPEC REPOS:
+  trunk:
+    - Then
+
+EXTERNAL SOURCES:
+  Keys:
+    :path: Pods/CocoaPodsKeys
+  Sentry:
+    :path: sentry-cocoa
+
+SPEC CHECKSUMS:
+  Keys: a576f4c9c1c641ca913a959a9c62ed3f215a8de9
+  Sentry: a0d4563fa4ddacba31fdcc35daaa8573d87224d6
+  Then: 844265ae87834bbe1147d91d5d41a404da2ec27d
+
+PODFILE CHECKSUM: ad6546ce140c34cbbf31049db32413dca46ed282
+
+COCOAPODS: 1.11.3

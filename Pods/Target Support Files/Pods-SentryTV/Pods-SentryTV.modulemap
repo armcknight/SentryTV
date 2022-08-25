@@ -1,0 +1,6 @@
+framework module Pods_SentryTV {
+  umbrella header "Pods-SentryTV-umbrella.h"
+
+  export *
+  module * { export * }
+}

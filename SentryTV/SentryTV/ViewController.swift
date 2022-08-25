@@ -9,14 +9,15 @@ import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    private var projectJSON: SentryProject?
+    private var projectJSON: SentryProjects?
+    private let apiClient = SentryAPIClient()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.rowHeight = UITableView.automaticDimension
 
-        SentryAPIClient.getOrganizations { result in
+        apiClient.getOrganizations { result in
             print("here")
         }
     }
