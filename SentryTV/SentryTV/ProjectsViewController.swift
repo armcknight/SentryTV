@@ -90,6 +90,19 @@ extension ProjectsViewController: UITableViewDataSource {
             if let projectCell = cell as? ProjectTableViewCell {
                 projectCell.label.text = project["slug"] as? String
                 projectCell.iconImage.image = UIImage(imageLiteralResourceName: "reading-logo")
+
+                guard let orgSlug = organization["slug"] as? String, let projectSlug = project["slug"] as? String else {
+                    fatalError("Couldn't get org/project slug for request.")
+                }
+                apiClient.getProjectEvents(org: orgSlug, project: projectSlug) { result in
+                    switch result {
+                    case .failure(let error): fatalError("Couldn't fetch project event info: \(error)")
+                    case .success(let json):
+                        DispatchQueue.main.async {
+                            projectCell.setTimeseries(json)
+                        }
+                    }
+                }
             }
         }
         return cell

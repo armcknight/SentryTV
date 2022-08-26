@@ -26,6 +26,7 @@ enum SentryAPI {
     case issues(SentryOrganizationSlug, SentryProjectSlug)
     case issue(SentryIssueID)
     case issueLatestEvent(SentryIssueID)
+    case projectEvents(SentryOrganizationSlug, SentryProjectSlug)
 
     var path: String {
         switch self {
@@ -35,6 +36,7 @@ enum SentryAPI {
         case .issues(let org, let proj): return "/api/0/projects/\(org)/\(proj)/issues/"
         case .issue(let id): return "/api/0/issues/\(id)/"
         case .issueLatestEvent(let id): return "/api/0/issues/\(id)/events/latest/"
+        case .projectEvents(let org, let proj): return "/api/0/projects/\(org)/\(proj)/stats/"
         }
     }
 
@@ -144,6 +146,46 @@ extension SentryAPIClient {
             self.get(request: request) { result in
                 handler(result)
             }
+        }
+    }
+
+    func getProjectEvents(org: SentryOrganizationSlug, project: SentryProjectSlug, handler: @escaping (Result<[[Int]], Error>) -> Void) {
+        switch buildRequest(.projectEvents(org, project)) {
+        case .failure(let error): handler(.failure(error))
+        case .success(let request):
+            print("[SentryTV] performing request: \(String(describing: request))")
+            let task = urlSession.dataTask(with: request) { data, response, error in
+                guard error == nil else {
+                    handler(.failure(SentryAPIClientError.error("Request failed with error: \(String(describing: error))")))
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    handler(.failure(SentryAPIClientError.error("Response was not an HTTP response.")))
+                    return
+                }
+
+                guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 400 else {
+                    handler(.failure(SentryAPIClientError.error("Received unsuccessful HTTP response: \(httpResponse.statusCode)")))
+                    return
+                }
+
+                guard let data = data else {
+                    handler(.failure(SentryAPIClientError.error("Received no data from request.")))
+                    return
+                }
+
+                do {
+                    guard let json = try JSONSerialization.jsonObject(with: data) as? [[Int]] else {
+                        handler(.failure(SentryAPIClientError.error("Unexpected JSON structure.")))
+                        return
+                    }
+                    handler(.success(json))
+                } catch {
+                    handler(.failure(SentryAPIClientError.error("Error deserializing data: \(error)")))
+                }
+            }
+            task.resume()
         }
     }
 }
