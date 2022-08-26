@@ -1,4 +1,7 @@
 ${PODS_ROOT}/Target Support Files/Pods-SentryTV/Pods-SentryTV-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Anchorage/Anchorage.framework
+${BUILT_PRODUCTS_DIR}/Charts/Charts.framework
 ${BUILT_PRODUCTS_DIR}/Keys/Keys.framework
 ${BUILT_PRODUCTS_DIR}/Sentry/Sentry.framework
+${BUILT_PRODUCTS_DIR}/SwiftAlgorithms/Algorithms.framework
 ${BUILT_PRODUCTS_DIR}/Then/Then.framework

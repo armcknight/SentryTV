@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="20037" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="20037" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="o78-ud-Ud8">
     <device id="appleTV" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
@@ -7,10 +7,26 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Navigation Controller-->
+        <scene sceneID="DeC-qK-xT3">
+            <objects>
+                <navigationController id="o78-ud-Ud8" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="KbV-A6-fNM">
+                        <rect key="frame" x="0.0" y="60" width="1920" height="145"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="DMi-tF-8QD"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="8m5-qd-nST" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2739" y="24"/>
+        </scene>
+        <!--Organization View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="SentryTV" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="OrganizationViewController" customModule="SentryTV" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -20,20 +36,26 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="Lby-MU-7jD">
-                                <rect key="frame" x="96" y="68" width="220" height="220"/>
+                                <rect key="frame" x="96" y="213" width="220" height="220"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="220" id="Ibz-nl-YMt"/>
                                     <constraint firstAttribute="width" secondItem="Lby-MU-7jD" secondAttribute="height" multiplier="1:1" id="pmr-cw-Nx8"/>
                                 </constraints>
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select Your Organization" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="whw-rJ-5X5">
+                                <rect key="frame" x="332" y="213" width="1492" height="91"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" sectionHeaderHeight="66" sectionFooterHeight="66" translatesAutoresizingMaskIntoConstraints="NO" id="Kgr-cD-n9N">
-                                <rect key="frame" x="439" y="68" width="1385" height="944"/>
+                                <rect key="frame" x="332" y="312" width="1492" height="700"/>
                                 <prototypes>
                                     <tableViewCell contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="OrganizationCell" id="DX1-HZ-YWr" customClass="OrganizationTableViewCell" customModule="SentryTV" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="66" width="1385" height="66"/>
+                                        <rect key="frame" x="0.0" y="66" width="1492" height="66"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="DX1-HZ-YWr" id="0IP-jY-JyU">
-                                            <rect key="frame" x="0.0" y="0.0" width="1385" height="66"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1492" height="66"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="vKS-Gf-A9v">
@@ -44,7 +66,7 @@
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yjC-1z-CyT">
-                                                    <rect key="frame" x="272" y="8" width="1097" height="46"/>
+                                                    <rect key="frame" x="272" y="8" width="1204" height="46"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -77,13 +99,17 @@
                         <color key="backgroundColor" red="0.16078431372549018" green="0.11372549019607843" blue="0.21176470588235294" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Lby-MU-7jD" firstAttribute="top" secondItem="wu6-TO-1qx" secondAttribute="top" constant="8" id="0Mk-Xy-JJF"/>
-                            <constraint firstItem="Kgr-cD-n9N" firstAttribute="leading" secondItem="Lby-MU-7jD" secondAttribute="trailing" constant="123" id="8ue-3T-MZp"/>
-                            <constraint firstItem="Kgr-cD-n9N" firstAttribute="top" secondItem="Lby-MU-7jD" secondAttribute="top" id="beg-gl-8oK"/>
+                            <constraint firstItem="wu6-TO-1qx" firstAttribute="trailing" secondItem="whw-rJ-5X5" secondAttribute="trailing" constant="16" id="3om-ZI-gUK"/>
+                            <constraint firstItem="Kgr-cD-n9N" firstAttribute="top" secondItem="whw-rJ-5X5" secondAttribute="bottom" constant="8" id="QhW-UK-ksN"/>
                             <constraint firstItem="wu6-TO-1qx" firstAttribute="bottom" secondItem="Kgr-cD-n9N" secondAttribute="bottom" constant="8" id="cGm-Oy-cQX"/>
+                            <constraint firstItem="Kgr-cD-n9N" firstAttribute="leading" secondItem="whw-rJ-5X5" secondAttribute="leading" id="gYC-w1-vSL"/>
                             <constraint firstItem="wu6-TO-1qx" firstAttribute="trailing" secondItem="Kgr-cD-n9N" secondAttribute="trailing" constant="16" id="heZ-sx-Ud9"/>
+                            <constraint firstItem="whw-rJ-5X5" firstAttribute="leading" secondItem="Lby-MU-7jD" secondAttribute="trailing" constant="16" id="jLu-Mi-DON"/>
                             <constraint firstItem="Lby-MU-7jD" firstAttribute="leading" secondItem="wu6-TO-1qx" secondAttribute="leading" constant="16" id="lFD-9P-ONO"/>
+                            <constraint firstItem="whw-rJ-5X5" firstAttribute="top" secondItem="Lby-MU-7jD" secondAttribute="top" id="vE6-54-uOH"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="k4n-rJ-R7W"/>
                     <connections>
                         <outlet property="tableView" destination="Kgr-cD-n9N" id="rAF-A7-frA"/>
                     </connections>

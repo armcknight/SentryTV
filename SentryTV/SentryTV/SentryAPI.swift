@@ -9,23 +9,32 @@ import Keys
 import Then
 import UIKit
 
+typealias SentryOrganizationSlug = String
+typealias SentryProjectSlug = String
+typealias SentryIssueID = String
 typealias SentryJSON = [String: Any]
 typealias SentryJSONCollection = [SentryJSON]
+typealias SentryOrganization = SentryJSON
+typealias SentryProject = SentryJSON
 typealias SentryOrganizations = SentryJSONCollection
 typealias SentryProjects = SentryJSONCollection
 
 enum SentryAPI {
     case authorize
     case organizations
-
-    typealias SentryOrganizationID = String
-    case projects(SentryOrganizationID)
+    case projects(SentryOrganizationSlug)
+    case issues(SentryOrganizationSlug, SentryProjectSlug)
+    case issue(SentryIssueID)
+    case issueLatestEvent(SentryIssueID)
 
     var path: String {
         switch self {
         case .authorize: return "/api/0/"
         case .organizations: return "/api/0/organizations/"
-        case .projects(let org): return "/api/0/organizations\(org)/projects/"
+        case .projects(let org): return "/api/0/organizations/\(org)/projects/"
+        case .issues(let org, let proj): return "/api/0/projects/\(org)/\(proj)/issues/"
+        case .issue(let id): return "/api/0/issues/\(id)/"
+        case .issueLatestEvent(let id): return "/api/0/issues/\(id)/events/latest/"
         }
     }
 
@@ -42,6 +51,11 @@ class SentryAPIClient: NSObject {
         case error(String)
     }
 
+    enum CacheKey: String, CaseIterable {
+        case organizations = "io.sentry.tv.cached-organizations"
+        case projects = "io.sentry.tv.cached-projects"
+    }
+
     private lazy var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.httpAdditionalHeaders = ["Authorization": "Bearer \(token)"]
@@ -49,8 +63,25 @@ class SentryAPIClient: NSObject {
     }()
     private var token: String = SentryTVKeys().sentryAuthToken
 
-    private var cachedOrganizations: SentryOrganizations?
-    private var cachedProjects: SentryProjects?
+    private lazy var cachedOrganizations: SentryOrganizations? = {
+        guard let data = UserDefaults.standard.object(forKey: "io.sentry.tv.cached-organizations") as? Data else {
+            return nil
+        }
+        do {
+            return try NSKeyedUnarchiver(forReadingFrom: data).decodeObject(forKey: "json") as? SentryOrganizations
+        } catch {
+            print("[SentryTV] failed to unarchive cache: \(error)")
+            return nil
+        }
+    }()
+
+    typealias SentryProjectCache = [SentryOrganizationSlug: SentryProjects]
+    private lazy var cachedProjects: SentryProjectCache? = {
+        guard let data = UserDefaults.standard.object(forKey: "io.sentry.tv.cached-projects") as? Data else {
+            return nil
+        }
+        return try? NSKeyedUnarchiver(forReadingFrom: data).decodeObject(forKey: "json") as? SentryProjectCache
+    }()
 }
 
 extension SentryAPIClient {
@@ -66,15 +97,23 @@ extension SentryAPIClient {
             self.get(request: request) { requestResult in
                 handler(requestResult.map { json -> SentryOrganizations in
                     self.cachedOrganizations = json
+                    NSKeyedArchiver(requiringSecureCoding: false).do {
+                        $0.encode(json, forKey: "json")
+                        UserDefaults.standard.set($0.encodedData, forKey: "io.sentry.tv.cached-organizations")
+                    }
                     return json
                 })
             }
         }
     }
 
-    func getProjects(organization: String, handler: @escaping (Result<SentryProjects, Error>) -> Void) {
+    func getProjects(organization: SentryOrganizationSlug, handler: @escaping (Result<SentryProjects, Error>) -> Void) {
         if let cachedProjects = cachedProjects {
-            handler(.success(cachedProjects))
+            guard let cache = cachedProjects[organization] else {
+                handler(.failure(SentryAPIClientError.error("No projects cached for organization \(organization)")))
+                return
+            }
+            handler(.success(cache))
             return
         }
 
@@ -82,10 +121,28 @@ extension SentryAPIClient {
         case .failure(let error): handler(.failure(error))
         case .success(let request):
             self.get(request: request) { requestResult in
-                handler(requestResult.map { json -> SentryOrganizations in
-                    self.cachedProjects = json
+                handler(requestResult.map { json -> SentryProjects in
+                    if var cache = self.cachedProjects {
+                        cache[organization] = json
+                    } else {
+                        self.cachedProjects = [organization: json]
+                    }
+                    NSKeyedArchiver(requiringSecureCoding: false).do {
+                        $0.encode(self.cachedProjects, forKey: "json")
+                        UserDefaults.standard.set($0.encodedData, forKey: "io.sentry.tv.cached-projects")
+                    }
                     return json
                 })
+            }
+        }
+    }
+
+    func getIssues(org: SentryOrganizationSlug, project: SentryProjectSlug, handler: @escaping (Result<SentryProjects, Error>) -> Void) {
+        switch buildRequest(.issues(org, project)) {
+        case .failure(let error): handler(.failure(error))
+        case .success(let request):
+            self.get(request: request) { result in
+                handler(result)
             }
         }
     }
@@ -114,6 +171,7 @@ private extension SentryAPIClient {
     }
 
     func get(request: URLRequest, handler: @escaping (Result<SentryJSONCollection, Error>) -> Void) {
+        print("[SentryTV] performing request: \(String(describing: request))")
         let task = urlSession.dataTask(with: request) { data, response, error in
             self.decodedJSONFromRequest(data: data, response: response, error: error) { result in
                 switch result {
@@ -150,8 +208,6 @@ private extension SentryAPIClient {
         }
 
         do {
-            let string = String(data: data, encoding: .utf8)
-            let json = try JSONSerialization.jsonObject(with: data)
             guard let json = try JSONSerialization.jsonObject(with: data) as? SentryJSONCollection else {
                 handler(.failure(SentryAPIClientError.error("Unexpected JSON structure.")))
                 return

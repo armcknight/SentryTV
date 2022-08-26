@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  OrganizationViewController.swift
 //  SentryTV
 //
 //  Created by Andrew McKnight on 8/24/22.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class OrganizationViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     private var organizations: SentryOrganizations?
     private var projects: SentryProjects?
@@ -31,7 +31,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: UITableViewDataSource {
+extension OrganizationViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return organizations?.count ?? 0
     }
@@ -48,8 +48,13 @@ extension ViewController: UITableViewDataSource {
     }
 }
 
-extension ViewController: UITableViewDelegate {
+extension OrganizationViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return 250
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let org = organizations![indexPath.row]
+        navigationController?.pushViewController(ProjectsViewController(organization: org), animated: true)
     }
 }

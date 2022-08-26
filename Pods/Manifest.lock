@@ -1,17 +1,28 @@
 PODS:
+  - Anchorage (4.5.0)
+  - Charts (4.0.3):
+    - Charts/Core (= 4.0.3)
+  - Charts/Core (4.0.3):
+    - SwiftAlgorithms (~> 1.0)
   - Keys (1.0.1)
   - Sentry (7.23.0):
     - Sentry/Core (= 7.23.0)
   - Sentry/Core (7.23.0)
+  - SwiftAlgorithms (1.0.0)
   - Then (3.0.0)
 
 DEPENDENCIES:
+  - Anchorage
+  - Charts
   - Keys (from `Pods/CocoaPodsKeys`)
   - Sentry (from `sentry-cocoa`)
   - Then
 
 SPEC REPOS:
   trunk:
+    - Anchorage
+    - Charts
+    - SwiftAlgorithms
     - Then
 
 EXTERNAL SOURCES:
@@ -21,10 +32,13 @@ EXTERNAL SOURCES:
     :path: sentry-cocoa
 
 SPEC CHECKSUMS:
+  Anchorage: 1961bc81c84aeed54ad7ffc697c50cd9de748ba6
+  Charts: d959d6723c8eedfdd0735dfc28cb0a71762ac4d9
   Keys: a576f4c9c1c641ca913a959a9c62ed3f215a8de9
   Sentry: a0d4563fa4ddacba31fdcc35daaa8573d87224d6
+  SwiftAlgorithms: 38dda4731d19027fdeee1125f973111bf3386b53
   Then: 844265ae87834bbe1147d91d5d41a404da2ec27d
 
-PODFILE CHECKSUM: ad6546ce140c34cbbf31049db32413dca46ed282
+PODFILE CHECKSUM: bc68bb9199f0d593ec00a0cdb362ff2205456bee
 
 COCOAPODS: 1.11.3
