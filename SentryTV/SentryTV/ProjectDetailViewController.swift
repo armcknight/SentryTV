@@ -19,6 +19,10 @@ class ProjectDetailViewController: UIViewController {
     private let titleLabel = UILabel(frame: .zero)
     private let issuesChartView = LineChartView(frame: .zero)
     private let issueListTableView = UITableView(frame: .zero)
+    private let logoImageView = UIImageView(frame: .zero).then {
+        $0.image = UIImage(imageLiteralResourceName: "logo")
+    }
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
 
     let isoDF = ISO8601DateFormatter().then {
         $0.formatOptions = .withInternetDateTime.subtracting(.withTimeZone)
@@ -39,6 +43,7 @@ class ProjectDetailViewController: UIViewController {
             fatalError("Project has no name or slug")
         }
         titleLabel.text = "\(name) Issues"
+        titleLabel.font = .preferredFont(forTextStyle: .title1)
 
         issueListTableView.dataSource = self
         issueListTableView.delegate = self
@@ -55,6 +60,7 @@ class ProjectDetailViewController: UIViewController {
             $0.legend.font = .systemFont(ofSize: 20)
             $0.legend.form = .circle
             $0.tintColor = .white
+            $0.noDataText = ""
         }
 
         class XAxisTimestampValueFormatter: NSObject, AxisValueFormatter {
@@ -68,18 +74,37 @@ class ProjectDetailViewController: UIViewController {
         }
         issuesChartView.xAxis.valueFormatter = XAxisTimestampValueFormatter()
 
-        [titleLabel, issuesChartView, issueListTableView].forEach {
+        [titleLabel, issuesChartView, issueListTableView, logoImageView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-        UIStackView(arrangedSubviews: [titleLabel, UIStackView(arrangedSubviews: [issuesChartView, issueListTableView]).then {
-            $0.axis = .vertical
-            $0.distribution = .fillEqually
-            $0.spacing = 8
-        }]).do {
+
+        let stack = UIStackView(arrangedSubviews: [
+            titleLabel, UIStackView(arrangedSubviews: [issuesChartView, issueListTableView]).then {
+                $0.axis = .vertical
+                $0.distribution = .fillEqually
+                $0.spacing = 8
+            }]).then {
+                $0.axis = .vertical
+                $0.spacing = 8
+                view.addSubview($0)
+                $0.verticalAnchors == view.safeAreaLayoutGuide.verticalAnchors
+                $0.trailingAnchor == view.safeAreaLayoutGuide.trailingAnchor
+            }
+
+        activityIndicator.do {
             view.addSubview($0)
-            $0.spacing = 8
-            $0.axis = .vertical
-            $0.edgeAnchors == view.safeAreaLayoutGuide.edgeAnchors
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerAnchors == issuesChartView.centerAnchors
+            $0.startAnimating()
+        }
+
+        logoImageView.do {
+            view.addSubview($0)
+            $0.widthAnchor == 220
+            $0.heightAnchor == logoImageView.widthAnchor
+            $0.leadingAnchor == view.safeAreaLayoutGuide.leadingAnchor
+            $0.topAnchor == view.safeAreaLayoutGuide.topAnchor
+            stack.leadingAnchor == $0.trailingAnchor + 16
         }
 
         guard let orgSlug = organization["slug"] as? String, let projectSlug = project["slug"] as? String else {
@@ -91,6 +116,9 @@ class ProjectDetailViewController: UIViewController {
             case .failure(let error): fatalError(error.localizedDescription)
             case .success(let json):
                 self.issues = json
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                }
                 DispatchQueue.main.async {
                     self.issueListTableView.reloadData()
                 }

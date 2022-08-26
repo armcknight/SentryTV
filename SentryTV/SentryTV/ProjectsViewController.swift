@@ -13,6 +13,7 @@ class ProjectsViewController: UIViewController {
     private let tableView = UITableView(frame: .zero)
     private let logoImageView = UIImageView(frame: .zero)
     private let titleLabel = UILabel(frame: .zero)
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
 
     private var projects: SentryProjects?
     private let apiClient = SentryAPIClient()
@@ -31,25 +32,33 @@ class ProjectsViewController: UIViewController {
 
         logoImageView.image = UIImage(imageLiteralResourceName: "logo")
         titleLabel.text = "Select Your Project"
+        titleLabel.font = UIFont.preferredFont(forTextStyle: .title1)
 
         [tableView, logoImageView, titleLabel].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
 
-        logoImageView.topAnchor == view.safeAreaLayoutGuide.topAnchor + 8
-        logoImageView.leadingAnchor == view.safeAreaLayoutGuide.leadingAnchor + 16
+        logoImageView.topAnchor == view.safeAreaLayoutGuide.topAnchor
+        logoImageView.leadingAnchor == view.safeAreaLayoutGuide.leadingAnchor
         logoImageView.widthAnchor == 220
         logoImageView.heightAnchor == logoImageView.widthAnchor
 
         titleLabel.topAnchor == logoImageView.topAnchor
         titleLabel.leadingAnchor == logoImageView.trailingAnchor + 16
-        titleLabel.trailingAnchor == view.safeAreaLayoutGuide.trailingAnchor - 16
+        titleLabel.trailingAnchor == view.safeAreaLayoutGuide.trailingAnchor
 
         tableView.topAnchor == titleLabel.bottomAnchor + 8
         tableView.leadingAnchor == titleLabel.leadingAnchor
         tableView.trailingAnchor == titleLabel.trailingAnchor
-        tableView.bottomAnchor == view.safeAreaLayoutGuide.bottomAnchor - 8
+        tableView.bottomAnchor == view.safeAreaLayoutGuide.bottomAnchor
+
+        activityIndicator.do {
+            view.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerAnchors == tableView.centerAnchors
+            $0.startAnimating()
+        }
 
         let orgName = organization["slug"] as! String
         apiClient.getProjects(organization: orgName) { result in
@@ -58,6 +67,7 @@ class ProjectsViewController: UIViewController {
             case .success(let projects):
                 self.projects = projects
                 DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
                     self.tableView.reloadData()
                 }
             }

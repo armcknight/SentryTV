@@ -5,10 +5,14 @@
 //  Created by Andrew McKnight on 8/24/22.
 //
 
+import Anchorage
+import Then
 import UIKit
 
 class OrganizationViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+
     private var organizations: SentryOrganizations?
     private var projects: SentryProjects?
     private let apiClient = SentryAPIClient()
@@ -18,12 +22,20 @@ class OrganizationViewController: UIViewController {
 
         tableView.rowHeight = UITableView.automaticDimension
 
+        activityIndicator.do {
+            view.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerAnchors == tableView.centerAnchors
+            $0.startAnimating()
+        }
+
         apiClient.getOrganizations { result in
             switch result {
             case .failure(let error): fatalError(error.localizedDescription)
             case .success(let organizations):
                 self.organizations = organizations
                 DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
                     self.tableView.reloadData()
                 }
             }

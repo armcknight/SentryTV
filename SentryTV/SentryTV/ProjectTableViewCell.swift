@@ -7,6 +7,7 @@
 
 import Anchorage
 import Foundation
+import Then
 import UIKit
 
 class ProjectTableViewCell: UITableViewCell {
@@ -21,6 +22,7 @@ class ProjectTableViewCell: UITableViewCell {
         [iconImage, label].do {
             $0.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
             UIStackView(arrangedSubviews: $0).do {
+                $0.spacing = 16
                 contentView.addSubview($0)
                 $0.edgeAnchors == contentView.edgeAnchors
             }
