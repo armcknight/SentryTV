@@ -19,6 +19,8 @@ class ProjectsViewController: UIViewController {
     private let apiClient = SentryAPIClient()
     private var organization: SentryOrganization
 
+    private let logos = ["brain", "flag", "flamingo", "heart", "kangaroo", "piggybank", "schoolbus", "thumbsup", "yoga"].map { UIImage(imageLiteralResourceName: $0) }
+
     init(organization: SentryOrganization) {
         self.organization = organization
         super.init(nibName: nil, bundle: nil)
@@ -89,7 +91,7 @@ extension ProjectsViewController: UITableViewDataSource {
         if let project = projects?[indexPath.row] {
             if let projectCell = cell as? ProjectTableViewCell {
                 projectCell.label.text = project["slug"] as? String
-                projectCell.iconImage.image = UIImage(imageLiteralResourceName: "reading-logo")
+                projectCell.iconImage.image = logos[Int(arc4random()) % logos.count]
 
                 guard let orgSlug = organization["slug"] as? String, let projectSlug = project["slug"] as? String else {
                     fatalError("Couldn't get org/project slug for request.")
